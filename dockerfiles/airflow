@@ -1,3 +1,4 @@
 FROM puckel/docker-airflow:latest
 
-RUN pip install requests && airflow initdb && airflow scheduler && airflow webserver 8080
+RUN pip install requests 
+## && airflow initdb && airflow webserver 8080
