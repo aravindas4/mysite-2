@@ -35,6 +35,7 @@ services:
       - backend1
 
   postgres:
+    container_name: polls-airflow-postgres
     image: postgres:9.6
     environment:
       - POSTGRES_USER=airflow
