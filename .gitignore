@@ -303,3 +303,4 @@ terraform.tfstate*
 .coverage
 
 *.sql
+./clickhouse_database/
