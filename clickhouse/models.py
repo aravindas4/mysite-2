@@ -1,22 +1,21 @@
-from sqlalchemy.orm import relationship
-# from importlib_metadata import metadata
-from sqlalchemy import create_engine, Column, MetaData, ForeignKey, literal
+from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import (
+    create_engine, Column, String, Integer, literal, DateTime, ForeignKey
+)
 
 
 
-from clickhouse_sqlalchemy import Table, make_session
 
-
-from clickhouse_sqlalchemy import Table, make_session, get_declarative_base, types, engines
+from clickhouse_sqlalchemy import engines
 
 uri = "clickhouse://default:@clickhouse_server/polls"
 
 engine = create_engine(uri)
-session = make_session(engine)
-metadata = MetaData(bind=engine)
+session = sessionmaker(engine)()
 
 
-Base = get_declarative_base(metadata=metadata)
+Base = declarative_base()
 
 """
 class Question(models.Model):
@@ -33,16 +32,14 @@ class Question(models.Model):
 
 class Question(Base):
     __tablename__ = "polls_question"
-
-    id = Column("id", types.Int32, primary_key=True)
-    question_text = Column("question_text", types.String)
-    pub_date = Column(
-        "pub_date", 
-        types.DateTime,
-        clickhouse_codec=('DoubleDelta', 'ZSTD'),
+    __table_args__ = (
+        engines.MergeTree(order_by=['id']), engines.Memory(),
+        # {'schema': database},
     )
 
-    __table_args__ = (engines.Memory(),)
+    id = Column("id", Integer(), primary_key=True)
+    question_text = Column("question_text", String(200))
+    pub_date = Column("pub_date", DateTime(),)
 
 
     
@@ -61,11 +58,15 @@ class Choice(models.Model):
 
 class Choice(Base):
     __tablename__ = "polls_choice"
+    __table_args__ = (
+        engines.MergeTree(order_by=['id']), engines.Memory(),
+        # {'schema': database},
+    )
 
-    id = Column("id", types.Int32, primary_key=True)
-    question_id = Column("question_id", types.Int32)
+    id = Column("id", Integer(), primary_key=True)
+    question_id = Column("question_id", Integer, )
 
-    choice_text = Column("choice_text", types.String)
-    votes = Column("votes", types.Int32, server_default=literal(0))
+    # question = relationship("Question")
 
-    __table_args__ = (engines.Memory(),)
+    choice_text = Column("choice_text", String(200))
+    votes = Column("votes", Integer(), default=0)
