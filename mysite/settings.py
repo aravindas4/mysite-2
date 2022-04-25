@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'polls',
+
+    "graphene_django",
 ]
 
 MIDDLEWARE = [
@@ -107,6 +109,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+GRAPHENE = {
+    'SCHEMA': 'mysite.schema.schema'
+}
 
 
 # Internationalization
