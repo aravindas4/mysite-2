@@ -2,6 +2,10 @@ import datetime
 from django.db import models
 from pytz import timezone
 
+from django.db.models.signals import post_signal
+from django.dispatch import receiver
+
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date publilshed')
@@ -23,3 +27,12 @@ class Choice(models.Model):
 
     def __str__(self) -> str:
         return self.choice_text
+
+
+@receiver(post_signal, sender=Question)
+def post_signal_for_question(sender, instance, **kwargs):
+    pass 
+
+@receiver(post_signal, sender=Choice)
+def post_signal_for_choice(sender, instance, **kwargs):
+    pass
