@@ -16,6 +16,7 @@
 ### Mutations:
 - Vote a choice for a question
 
+### Misc:
 - DB Used: Mysql
 - Both DB and django have been dockerized
 - All the requirements are placed in `requirements.txt`
