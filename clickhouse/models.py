@@ -12,6 +12,7 @@ from clickhouse_sqlalchemy import engines
 uri = "clickhouse://default:@clickhouse_server/polls"
 
 engine = create_engine(uri)
+conn = engine.connect()
 session = sessionmaker(engine)()
 
 

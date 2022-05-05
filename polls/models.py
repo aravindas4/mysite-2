@@ -2,7 +2,7 @@ import datetime
 from django.db import models
 from pytz import timezone
 
-from django.db.models.signals import post_signal
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
@@ -29,10 +29,10 @@ class Choice(models.Model):
         return self.choice_text
 
 
-@receiver(post_signal, sender=Question)
+@receiver(post_save, sender=Question)
 def post_signal_for_question(sender, instance, **kwargs):
     pass 
 
-@receiver(post_signal, sender=Choice)
+@receiver(post_save, sender=Choice)
 def post_signal_for_choice(sender, instance, **kwargs):
     pass

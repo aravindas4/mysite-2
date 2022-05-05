@@ -29,7 +29,7 @@ services:
       - .:/app
     ports:
       - 8000:8000
-      - 8080:8080
+      # - 8080:8080
     links:
       - db
     networks:
@@ -79,7 +79,7 @@ services:
 
   clickhouse_server:
     container_name: polls-clickhouse
-    image: altinity/clickhouse-server:21.8.10.1.altinitystable
+    image: yandex/clickhouse-server
     ports:
     - "8123:8123"
     volumes:

@@ -12,9 +12,38 @@
 ### Queries:
 - List questions (unpaginated and unfiltered). 
 - Detail a question. Further all associtaed choies can listed using key `choices`
+```sh
+{
+  question(questionId: "4") {
+    id
+    questionText
+    choices {
+      id
+      choiceText
+      votes
+    }
+  }
+}
+```
 
 ### Mutations:
 - Vote a choice for a question
+
+```sh
+mutation {
+  voteQuestion(input: {questionId: "4", choiceId: "2"}) {
+    question {
+      id
+      questionText
+      choices {
+        id
+        votes
+        choiceText
+      }
+    }
+  }
+}
+```
 
 ### Misc:
 - DB Used: Mysql
