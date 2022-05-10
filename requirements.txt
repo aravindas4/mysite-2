@@ -4,5 +4,6 @@ cryptography==36.0.2
 graphene-django==2.15.0
 clickhouse-sqlalchemy==0.2.0
 importlib-metadata==4.11.3
+django-filter==21.1
 
 ipython==8.2.0

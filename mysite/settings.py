@@ -38,9 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'polls',
+    "polls",
 
     "graphene_django",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -114,6 +115,14 @@ AUTH_PASSWORD_VALIDATORS = [
 GRAPHENE = {
     'SCHEMA': 'mysite.schema.schema'
 }
+
+# GRAPHENE_DJANGO_EXTRAS = {
+#     'DEFAULT_PAGINATION_CLASS': 'graphene_django_extras.paginations.LimitOffsetGraphqlPagination',
+#     'DEFAULT_PAGE_SIZE': 20,
+#     'MAX_PAGE_SIZE': 50,
+#     'CACHE_ACTIVE': True,
+#     'CACHE_TIMEOUT': 300    # seconds
+# }
 
 
 # Internationalization

@@ -8,7 +8,11 @@ class QuestionType(DjangoObjectType):
     class Meta:
         model = Question
         fields = ("id", "question_text", "pub_date", "choices")
+        filter_fields = ['question_text', 'id']
 
+    def resolve(self, offset=9):
+        print(offset)
+        return Question.objects.all()
 
 class ChoiceType(DjangoObjectType):
     class Meta:
@@ -17,8 +21,8 @@ class ChoiceType(DjangoObjectType):
 
 
 class VoteQuestionInput(graphene.InputObjectType):
-    question_id = graphene.ID()
-    choice_id = graphene.ID()
+    question_id = graphene.ID(required=True)
+    choice_id = graphene.ID(required=True)
 
 
 class VoteQuestion(graphene.Mutation):
@@ -35,7 +39,3 @@ class VoteQuestion(graphene.Mutation):
         choice.save()
 
         return VoteQuestion(question=question)
-
-
-
-
