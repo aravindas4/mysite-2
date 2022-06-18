@@ -1,9 +1,9 @@
 import datetime
 from django.db import models
-from pytz import timezone
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Question(models.Model):
@@ -13,6 +13,11 @@ class Question(models.Model):
 
     def __str__(self) -> str:
         return self.question_text
+
+    def save(self, *args, **kwargs):
+        if self.pub_date is None:
+            self.pub_date = timezone.now()
+        super().save(*args, **kwargs)
 
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)

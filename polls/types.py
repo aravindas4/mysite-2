@@ -218,3 +218,132 @@ class VoteQuestion(graphene.Mutation):
         choice.save()
 
         return VoteQuestion(question=question)
+
+
+class QuestionInput(graphene.InputObjectType):
+    id = graphene.ID()
+    question_text = graphene.String()
+
+class QuestionsInput(graphene.InputObjectType):
+    questions = graphene.List(QuestionInput, required=True)
+
+from django import forms
+class QuestionForm(forms.ModelForm):
+    pub_date = forms.DateTimeField(required=False)
+    class Meta:
+        model = Question
+        fields = ("id", "question_text", "pub_date")
+
+
+class StatusMessage(graphene.ObjectType):
+    field = graphene.String()
+    message = graphene.String(required=True)
+
+class StatusInfo(graphene.ObjectType):
+    success = graphene.Boolean(required=True)
+    messages = graphene.List(StatusMessage, required=True)
+
+    @classmethod
+    def fail(cls, messages=None):
+        if messages is None:
+            messages = []
+        return StatusInfo(success=False, messages=messages)
+
+    @classmethod
+    def ok(cls, messages=None):
+        if messages is None:
+            messages = []
+        return StatusInfo(success=True, messages=messages)
+
+
+class MutateQuestions(graphene.Mutation):
+    status = graphene.Field(StatusInfo, required=True)
+    objects = graphene.List(QuestionType)
+    class Arguments:
+        input = QuestionsInput(required=True)
+
+
+    def verify_input(data):
+        error_messages = []
+
+        for ind, data in enumerate(data):
+            _id = data.get('id')
+
+            if _id is None:  #Create
+                obj = Question.objects.filter(pk=_id).first()
+
+                if obj is not None:
+                    error_messages.append({
+                        "id": ind,
+                        "key": "id",
+                        "message": f"Question with id# {_id} already exists"
+                    })
+                else:
+                    question_form = QuestionForm(data=data)
+                    if not question_form.is_valid():
+                        error_messages.extend(
+                            [
+                                {
+                                    "id": ind,
+                                    "key": key,
+                                    "message": value.get_json_data()[0]["message"]
+                                } for key, value in question_form.errors.items()
+                            ]
+                        )
+            else: # Update
+                obj = Question.objects.filter(pk=_id).first()
+
+                if obj is None:
+                    error_messages.append({
+                        "id": ind,
+                        "key": "id",
+                        "message": f"Question with id# {_id} does not exist"
+                    })
+                else:
+                    question_form = QuestionForm(data=data, instance=obj)
+                    if not question_form.is_valid():
+                        error_messages.extend(
+                            [
+                                {
+                                    "id": ind,
+                                    "key": key,
+                                    "message": value.get_json_data()[0]["message"]
+                                } for key, value in question_form.errors.items()
+                            ]
+                        )
+
+        return error_messages
+
+    @classmethod
+    def mutate(cls, root, info, input):
+
+        questions_data = input.get("questions")
+        error_messages = MutateQuestions.verify_input(questions_data)
+
+        if len(error_messages) > 0:
+            messages = []
+            for err_msg in error_messages:
+                messages.append(
+                    StatusMessage(
+                        field=f"{err_msg['id']}#{err_msg['key']}",
+                        message=err_msg["message"]
+                    )
+                )
+            return cls(
+                status=StatusInfo.fail(messages=messages),
+                objects=[]
+            )
+        
+        result = []
+        for question_data in questions_data:
+            _id = question_data.get("id")
+
+            if _id is None:
+                result.append(Question.objects.create(**question_data))
+            else:
+                result.append(
+                    Question.objects.filter(pk=_id).update(**question_data)
+                )
+
+        messages = [StatusMessage(message="Question are mutated successfully")]
+        return cls(status=StatusInfo.ok(messages=messages), objects=result)
