@@ -1,31 +1,42 @@
 from email.policy import default
 import graphene
+from requests import request
 
 from .models import Question
-from .types import QuestionType, ChoiceType, VoteQuestion
+from .types import QuestionType, ChoiceType, VoteQuestion,QuestionList, ListFilter
 # from graphene_django import DjangoListField
 
+
+
+
+class ListFilterArgument(graphene.InputObjectType):
+    field = graphene.String(required=True)
+    value = graphene.String(required=True)
+
+
+class SearchKeywordArgument(graphene.InputObjectType):
+    key = graphene.String(required=True)
+    value = graphene.String(required=True)
+
 class Query(graphene.ObjectType):
-    questions = graphene.List(
+    question = graphene.Field(
         QuestionType,
+        id=graphene.Argument(graphene.ID),
         resolver=QuestionType.resolve
     )
-    question = graphene.Field(QuestionType, question_id=graphene.ID())
     # choices = graphene.List(ChoiceType)
     # choice = graphene.Field(ChoiceType, choice_id=graphene.ID())
+    questions = graphene.Field(
+        QuestionList,
+        resolver=QuestionList.resolve,
+        limit=graphene.Argument(graphene.Int, default_value=10),
+        offset=graphene.Argument(graphene.Int, default_value=0),
+        filters=graphene.List(ListFilterArgument, default_value=[]),
+        seachables=graphene.List(SearchKeywordArgument, default_value=None),
+    )
 
-    
-
-    # def resolve_questions(self, info):
-        # import ipdb; ipdb.set_trace()
-        # return Query.paginate_qs(
-        #     Question.objects.all()
-        # )
-        # print("resolve questions")
-        # return Question.objects.all()
-
-    def resolve_question(self, info, question_id):
-        return Question.objects.get(pk=question_id)
+    # def resolve_question(self, info, question_id):
+    #     return Question.objects.get(pk=question_id)
 
     def resolve_choices(self, info, **kwargs):
         return ChoiceType.objects.all()
@@ -33,14 +44,14 @@ class Query(graphene.ObjectType):
     def resolve_choice(self, info, choice_id):
         return ChoiceType.objects.get(pk=choice_id)
 
-    def resolve(self, next, root, info, **args):
-        # import ipdb; ipdb.set_trace()
-        print(args)
-        # print(kwargs)
-        print("SOMMMMMMM")
-        # modify the qs for pagination
-        # individual resolvers
-        pass
+    # def resolve(self, next, root, info, **args):
+    #     # import ipdb; ipdb.set_trace()
+    #     print(args)
+    #     # print(kwargs)
+    #     print("SOMMMMMMM")
+    #     # modify the qs for pagination
+    #     # individual resolvers
+    #     pass
 
 
 class Mutation(graphene.ObjectType):

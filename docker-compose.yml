@@ -81,7 +81,7 @@ services:
     container_name: polls-clickhouse
     image: yandex/clickhouse-server
     ports:
-    - "8123:8123"
+    - "8124:8123"
     volumes:
     - ./clickhouse_database:/var/lib/clickhouse
     networks:
