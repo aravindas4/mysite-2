@@ -1,6 +1,4 @@
-from email.policy import default
 import graphene
-from requests import request
 
 from .models import Question
 from .types import QuestionType, ChoiceType, VoteQuestion,QuestionList, ListFilter
@@ -18,6 +16,15 @@ class SearchKeywordArgument(graphene.InputObjectType):
     key = graphene.String(required=True)
     value = graphene.String(required=True)
 
+
+class SortOrder(graphene.Enum):
+    ASC = "ASC"
+    DESC = "DESC"
+
+class SortInput(graphene.InputObjectType):
+    field = graphene.String(required=True)
+    order = graphene.Field(SortOrder, required=True)
+
 class Query(graphene.ObjectType):
     question = graphene.Field(
         QuestionType,
@@ -33,6 +40,7 @@ class Query(graphene.ObjectType):
         offset=graphene.Argument(graphene.Int, default_value=0),
         filters=graphene.List(ListFilterArgument, default_value=[]),
         seachables=graphene.List(SearchKeywordArgument, default_value=None),
+        sort=graphene.Argument(SortInput, default_value=None)
     )
 
     # def resolve_question(self, info, question_id):

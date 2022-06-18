@@ -41,6 +41,7 @@ class BaseList(graphene.ObjectType):
         filters = kwargs.get('filters', [])
         other_filters = kwargs.get('other_filters', {})
         seachables = kwargs.get('seachables', [])
+        sort = kwargs.get('sort')
 
         field_model = cls.detail_type._meta.model
 
@@ -64,9 +65,24 @@ class BaseList(graphene.ObjectType):
                     for field in cls.search_key_field_map[seachable["key"]]:
                         seach_qs.add(Q(**{field: seachable["value"]}), Q.OR)
 
+
+        order_by_field = 'pk'
+
+        if sort is not None:
+            if sort['field'] == 'id':
+                order_by_field = 'pk'
+            elif sort['field'] != 'pk':
+                order_by_field = sort["field"]
+
+            if sort["order"] == 'DESC':
+                order_by_field = f"-{order_by_field}"
+        
+
+
         qs = cls.get_queryset().filter(**final_filters, **other_filters).filter(
             seach_qs
-        ).distinct()
+        ).order_by(order_by_field).distinct()
+        
         count = qs.count()
         objects = qs[offset: limit+offset]
         obj = cls(limit=limit, offset=offset, objects=objects, count=count)
