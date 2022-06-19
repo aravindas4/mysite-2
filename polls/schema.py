@@ -1,7 +1,10 @@
 import graphene
 
 from .models import Question
-from .types import CreateQuestion, QuestionType, ChoiceType, VoteQuestion,QuestionList, ListFilter, MutateQuestions
+from .types import (
+    CreateQuestion, QuestionType, ChoiceType, VoteQuestion,QuestionList, 
+    ListFilter, MutateQuestions, DeleteQuestions
+)
 # from graphene_django import DjangoListField
 
 
@@ -66,3 +69,4 @@ class Mutation(graphene.ObjectType):
     vote_question = VoteQuestion.Field()
     mutate_questions = MutateQuestions.Field()
     create_question = CreateQuestion.Field()
+    delete_questions = DeleteQuestions.Field()

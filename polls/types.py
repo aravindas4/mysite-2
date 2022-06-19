@@ -446,3 +446,37 @@ class CreateQuestion(graphene.Mutation):
             status=StatusInfo.ok(messages=messages), 
             object=question
         )
+
+
+class IDsInput(graphene.InputObjectType):
+    pks = graphene.List(graphene.String, required=True)
+
+
+def purify(pks):
+    result = []
+    for pk in pks:
+        if pk.isdigit():
+            pk = int(pk)
+    
+        result.append(pk)
+
+    return result
+
+class DeleteQuestions(graphene.Mutation):
+    status = graphene.Field(StatusInfo, required=True)
+
+    class Arguments:
+        input = IDsInput(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, input):
+        result = Question.objects.filter(pk__in=purify(input["pks"])).delete()
+
+        if result[0] > 0:
+            messages = [StatusMessage(message="Objects were deleted successfully.")]
+        else:
+            messages = [StatusMessage(message="No objects were deleted.")]
+
+        return cls(
+            status=StatusInfo.ok(messages=messages)
+        )
