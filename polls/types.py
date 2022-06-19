@@ -234,6 +234,13 @@ class QuestionForm(forms.ModelForm):
         model = Question
         fields = ("id", "question_text", "pub_date")
 
+class ChoiceForm(forms.ModelForm):
+    question = forms.IntegerField(required=False)
+
+    class Meta:
+        model = Choice
+        fields = ("id", "choice_text", "question")
+
 
 class StatusMessage(graphene.ObjectType):
     field = graphene.String()
@@ -347,3 +354,95 @@ class MutateQuestions(graphene.Mutation):
 
         messages = [StatusMessage(message="Question are mutated successfully")]
         return cls(status=StatusInfo.ok(messages=messages), objects=result)
+
+
+class ChoiceInput(graphene.InputObjectType):
+    choice_text = graphene.String(required=True)
+
+class QuestionWithChoicesInput(QuestionInput):
+    choices = graphene.List(ChoiceInput, required=False)
+
+
+class CreateQuestion(graphene.Mutation):
+    status = graphene.Field(StatusInfo, required=True)
+    object = graphene.Field(QuestionType)
+
+    class Arguments:
+        input = QuestionWithChoicesInput(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, input):
+        print(input)
+        chocies_data = input.pop("choices", [])
+        question_data = input
+        error_messages = []
+
+        # validate question data
+        question_data.pop("id", None)
+
+        question_form = QuestionForm(data=question_data)
+
+        messages = []
+        if not question_form.is_valid():
+           question_errors = [
+                {
+                    "key": key,
+                    "message": value.get_json_data()[0]["message"]
+                } for key, value in question_form.errors.items()
+           ]
+
+           error_messages.extend(question_errors)
+
+        for ind, choice_data in enumerate(chocies_data):
+            choice_form = ChoiceForm(data=choice_data)
+
+            if not choice_form.is_valid():
+                choice_errors = [
+                    {
+                        "parent_key": "choices",
+                        "id": ind,
+                        "key": key,
+                        "message": value.get_json_data()[0]["message"]
+                    } for key, value in choice_form.errors.items()
+                ]
+
+                error_messages.extend(choice_errors)
+
+        if len(error_messages) > 0:
+            print(error_messages)
+            for err_msg in error_messages:
+                if "parent_key" in err_msg:
+                    parent_key = f"{err_msg['parent_key']}#"
+                else:
+                    parent_key = ""
+                
+                if "id" in err_msg:
+                    _id = f"{err_msg['id']}#"
+                else:
+                    _id = ""
+
+                final_message = f"{parent_key}{_id}{err_msg['key']}"
+                messages.append(
+                    StatusMessage(
+                        field=f"{final_message}",
+                        message=err_msg["message"]
+                    )
+                )
+            return cls(
+                status=StatusInfo.fail(messages=messages),
+                object=None
+            )
+
+        question = Question.objects.create(**question_data)
+        messages = [StatusMessage(message="Question Created succesfully")]
+
+        for choice_data in chocies_data:
+            Choice.objects.create(
+                **choice_data,
+                question_id=question.id
+            )
+        
+        return cls(
+            status=StatusInfo.ok(messages=messages), 
+            object=question
+        )
