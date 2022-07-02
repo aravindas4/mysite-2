@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "polls",
+    "pure",
 
     "graphene_django",
     "django_filters",
