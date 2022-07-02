@@ -18,6 +18,7 @@ class Person(ObjectType):
     def resolve(cls, info, *args, **kwargs):
         print("Person******")
         print(info)
+        print(args[0])
         print(dir(args[0]))
         print(args[0].variable_values)
         print(kwargs)
@@ -26,12 +27,13 @@ class Person(ObjectType):
 
 
 class Query(ObjectType):
+    hello1 = Field(String, name=String(default_value=10))
     hello = String(name=String(default_value="stranger"))
     goodbye = String()
     me = Field(Person, resolver=Person.resolve)
 
-    # def resolve_hello(root, info, name):
-    #     return f"Hello {name}"
+    def resolve_hello1(root, info, name):
+        return f"Hello {name}"
 
     def resolve_goodbye(parent, info):
         print(parent)
