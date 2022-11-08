@@ -34,7 +34,22 @@ class Choice(models.Model):
         return self.choice_text
 
 
+from enum import Enum
+import string
+
+def humanize_str(string):
+    return string.title().translate(str.maketrans({'_': ' ', '-': ' '}))
+
 class CatalogBackup(models.Model):
+
+    class CatalogStatus(str, Enum):
+        BACKING_UP = "BACKING_UP"
+        RESTORING = "RESTORING"
+
+        @classmethod
+        def choices(cls):
+            return tuple((i.value, humanize_str(i.name)) for i in cls)
+    
     biz = models.ForeignKey(
         Choice, related_name='catalog_backups', on_delete=models.CASCADE
     )
@@ -54,6 +69,11 @@ class CatalogBackup(models.Model):
 
     metric_details = models.TextField(
         "Metric details", blank=True, null=True, default="{}"
+    )
+
+    status = models.CharField(
+        "Status",  max_length=10, choices=CatalogStatus.choices(), 
+        null=True, blank=True
     )
 
     class Meta:
