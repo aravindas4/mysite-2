@@ -75,6 +75,10 @@ class CatalogBackup(models.Model):
         "Status",  max_length=10, choices=CatalogStatus.choices(), 
         null=True, blank=True
     )
+    creator_email = models.EmailField(
+        "Email of actual user incase if temp user creates backup",
+        null=True, blank=True
+    )
 
     class Meta:
         db_table = "atlas_catalogbackup"
