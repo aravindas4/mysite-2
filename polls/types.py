@@ -217,6 +217,10 @@ class VoteQuestion(graphene.Mutation):
         choice.votes += 1
         choice.save()
 
+        from chat.tasks import send_messages_to_room
+
+        send_messages_to_room("Chat_123", f"{choice.votes} done")
+
         return VoteQuestion(question=question)
 
 

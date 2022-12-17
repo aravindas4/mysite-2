@@ -40,6 +40,8 @@ INSTALLED_APPS = [
 
     "polls",
     "pure",
+    "chat",
+    "channels",
 
     "graphene_django",
     "django_filters",
@@ -73,7 +75,20 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mysite.wsgi.application'
+# WSGI_APPLICATION = 'mysite.wsgi.application'
+ASGI_APPLICATION = 'mysite.asgi.application'
+
+CHANNEL_LAYERS = {
+    # "default": {
+    #     "BACKEND": "channels_redis.core.RedisChannelLayer",
+    #     "CONFIG": {
+    #         "hosts": [("redis", 6379)],
+    #     },
+    # },
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
